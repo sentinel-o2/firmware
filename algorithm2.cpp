@@ -60,31 +60,39 @@
 #include "algorithm2.h"
 
 //#if defined(ARDUINO_AVR_UNO)
-//Arduino Uno doesn't have enough SRAM to store 100 samples of IR led data and red led data in 32-bit format
-//To solve this problem, 16-bit MSB of the sampled data will be truncated.  Samples become 16-bit data.
-//void maxim_heart_rate_and_oxygen_saturation(uint16_t *pun_ir_buffer, int32_t n_ir_buffer_length, uint16_t *pun_red_buffer, int32_t *pn_spo2, int8_t *pch_spo2_valid, 
-//                int32_t *pn_heart_rate, int8_t *pch_hr_valid)
+//  Arduino Uno doesn't have enough SRAM to store 100 samples of IR led data and
+//  red led data in 32-bit format.  To solve this problem, 16-bit MSB of the sampled data
+//  will be truncated.  Samples become 16-bit data.
+//  void maxim_heart_rate_and_oxygen_saturation(uint16_t *pun_ir_buffer, int32_t n_ir_buffer_length, \
+//                                              uint16_t *pun_red_buffer, int32_t *pn_spo2, int8_t *pch_spo2_valid, \
+//                                              int32_t *pn_heart_rate, int8_t *pch_hr_valid)
 //#else
-void maxim_heart_rate_and_oxygen_saturation(uint32_t *pun_ir_buffer, int32_t n_ir_buffer_length, uint32_t *pun_red_buffer, double *pn_spo2, int8_t *pch_spo2_valid, 
-                int32_t *pn_heart_rate, int8_t *pch_hr_valid)
+void maxim_heart_rate_and_oxygen_saturation(uint32_t *pun_ir_buffer, int32_t n_ir_buffer_length, \
+					    uint32_t *pun_red_buffer, double *pn_spo2, int8_t *pch_spo2_valid, \
+                                            int32_t *pn_heart_rate, int8_t *pch_hr_valid)
 //#endif
+  
 /**
-* \brief        Calculate the heart rate and SpO2 level
-* \par          Details
-*               By detecting  peaks of PPG cycle and corresponding AC/DC of red/infra-red signal, the an_ratio for the SPO2 is computed.
-*               Since this algorithm is aiming for Arm M0/M3. formaula for SPO2 did not achieve the accuracy due to register overflow.
-*               Thus, accurate SPO2 is precalculated and save longo uch_spo2_table[] per each an_ratio.
-*
-* \param[in]    *pun_ir_buffer           - IR sensor data buffer
-* \param[in]    n_ir_buffer_length      - IR sensor data buffer length
-* \param[in]    *pun_red_buffer          - Red sensor data buffer
-* \param[out]    *pn_spo2                - Calculated SpO2 value
-* \param[out]    *pch_spo2_valid         - 1 if the calculated SpO2 value is valid
-* \param[out]    *pn_heart_rate          - Calculated heart rate value
-* \param[out]    *pch_hr_valid           - 1 if the calculated heart rate value is valid
-*
-* \retval       None
-*/
+ * \brief        Calculate the heart rate and SpO2 level
+ * \par          Details
+ *               By detecting  peaks of PPG cycle and corresponding AC/DC of red/infra-red signal, 
+ *               the an_ratio for the SPO2 is computed.
+ *               Since this algorithm is aiming for Arm M0/M3, formula for SPO2 did not achieve 
+ *               the accuracy due to register overflow (in Arduino).
+ *               Thus, accurate SPO2 is precalculated and saved long uch_spo2_table[] per each 
+ *               an_ratio.
+ *
+ * \param[in]    *pun_ir_buffer          - IR sensor data buffer
+ * \param[in]    n_ir_buffer_length      - IR sensor data buffer length
+ * \param[in]    *pun_red_buffer         - Red sensor data buffer
+ * \param[out]   *pn_spo2                - Calculated SpO2 value
+ * \param[out]   *pch_spo2_valid         - 1 if the calculated SpO2 value is valid
+ * \param[out]   *pn_heart_rate          - Calculated heart rate value
+ * \param[out]   *pch_hr_valid           - 1 if the calculated heart rate value is valid
+ *
+ * \retval       None
+ */
+  
 {
   uint32_t un_ir_mean,un_only_once ;
   int32_t k, n_i_ratio_count;
@@ -199,15 +207,18 @@ void maxim_heart_rate_and_oxygen_saturation(uint32_t *pun_ir_buffer, int32_t n_i
   if( n_ratio_average>2 && n_ratio_average <184){
 //    n_spo2_calc= uch_spo2_table[n_ratio_average] ;
     *pn_spo2 = uch_spo2_table[n_ratio_average];
-    *pch_spo2_valid  = 1;//  float_SPO2 =  -45.060*n_ratio_average* n_ratio_average/10000 + 30.354 *n_ratio_average/100 + 94.845 ;  // for comparison with table
+    *pch_spo2_valid  = 1;    //  float_SPO2 =  -45.060*n_ratio_average* n_ratio_average/10000 + \
+                             //                 30.354 *n_ratio_average/100 + 94.845 ;
+                             //                 for comparison with table
   }
   else{
-    *pn_spo2 =  -999 ; // do not use SPO2 since signal an_ratio is out of range
+    *pn_spo2 =  -999 ;       // do not use SPO2 since signal an_ratio is out of range
     *pch_spo2_valid  = 0; 
   }
 }
 
-void maxim_find_peaks( int32_t *pn_locs, int32_t *n_npks,  int32_t  *pn_x, int32_t n_size, int32_t n_min_height, int32_t n_min_distance, int32_t n_max_num )
+void maxim_find_peaks( int32_t *pn_locs, int32_t *n_npks,  int32_t  *pn_x, int32_t n_size, \
+		       int32_t n_min_height, int32_t n_min_distance, int32_t n_max_num )
 /**
 * \brief        Find peaks
 * \par          Details
@@ -221,7 +232,8 @@ void maxim_find_peaks( int32_t *pn_locs, int32_t *n_npks,  int32_t  *pn_x, int32
   *n_npks = min( *n_npks, n_max_num );
 }
 
-void maxim_peaks_above_min_height( int32_t *pn_locs, int32_t *n_npks,  int32_t  *pn_x, int32_t n_size, int32_t n_min_height )
+void maxim_peaks_above_min_height( int32_t *pn_locs, int32_t *n_npks,  int32_t  *pn_x, int32_t n_size, \
+				   int32_t n_min_height )
 /**
 * \brief        Find peaks above n_min_height
 * \par          Details
