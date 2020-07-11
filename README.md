@@ -1,10 +1,15 @@
-README.md
----------
+Sentinel Oximeter Firmware
+==========================
 The code in this repository ports code from the following repos:
 - https://github.com/MaximIntegratedRefDesTeam/RD117_ARDUINO
 - https://github.com/aromring/MAX30102_by_RF
+These repositories are permissively licensed, and it is not necessary to
+have them cloned to use this repository.
 
-Tutorial sources:
+Getting Started
+---------------
+First, you'll need an understanding of the raspberry pi and how to use it.
+You may find these tutorial sources helpful:
 - RPi & C/C++:
     raspberrypi.projects.com
     cplusplus.com
@@ -17,6 +22,8 @@ Tutorial sources:
 - Anything:
     stackoverflow.com
     
+Building
+--------
 Files used in the build:
 - RD117piA.cpp
   - max30102pi.h
@@ -31,6 +38,8 @@ compile command:
 
   Note: you will get ~8 warnings about unused variables.
 
+Running
+-------
 execute command:
   sudo ./RD117piA
 
